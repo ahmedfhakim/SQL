@@ -51,3 +51,9 @@ ON Feb.orderID = customers.order_id
 WHERE Feb.Quantity > 2
 AND orderID <> ''
 AND orderID <> 'Order ID';
+
+#8. List all the products sold in New York in February and include how many of each were sold
+SELECT Product, SUM(quantity)
+FROM BIT_DB.FebSales
+WHERE location like '%New York%'
+GROUP BY Product;
