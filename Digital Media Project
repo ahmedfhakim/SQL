@@ -1,0 +1,101 @@
+#In this SQL project, I'm querying a dataset called chinook, which represents a digital media store and includes tables for artists, albums, media tracks, invoices, and customers.
+
+1. Show Customers who are not in the US.
+SELECT FirstName, LastName, CustomerId, Country
+FROM chinook.customers
+WHERE Country <> 'USA';
+
+#2. Show only the Customers from France
+SELECT * FROM chinook.customers
+WHERE Country = 'France';
+
+#3. Find the Invoices of customers who are from France. 
+SELECT customers.FirstName, customers.LastName, invoices.InvoiceId,  invoices.InvoiceDate, invoices.BillingCountry
+FROM chinook.invoices as invoices
+LEFT JOIN chinook.customers as customers
+ON invoices.CustomerId = customers.CustomerId
+WHERE invoices.BillingCountry = 'France';
+
+#4. Show the employees who are Sales Agents
+SELECT * FROM chinook.employees
+WHERE Title = 'Sales Support Agent';
+
+#5. Find a unique list of billing countries from the Invoice table.
+SELECT DISTINCT BillingCountry FROM chinook.invoices;
+
+#6. Show the invoices associated with each sales agent. 
+SELECT employees.FirstName, employees.LastName, invoices.InvoiceId
+FROM chinook.employees employees 
+    JOIN chinook.customers customers
+    ON customers.SupportRepId = employees.EmployeeId 
+    JOIN chinook.invoices invoices
+    ON invoices.CustomerId = customers.CustomerId;
+
+#7. Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+SELECT employees.FirstName, employees.LastName, customers.FirstName,customers.LastName, customers.Country, invoices.total
+FROM chinook.employees employees 
+    JOIN chinook.customers customers
+    ON customers.SupportRepId = employees.EmployeeId
+    JOIN chinook.invoices invoices
+    ON invoices.CustomerId = customers.CustomerId;
+
+#8. How many Invoices were there in 2013?
+SELECT COUNT(*) 
+FROM chinook.invoices
+WHERE InvoiceDate like BETWEEN '2013-01-01' AND '2013-12-31';
+
+#9. What were the total sales for 2013?
+SELECT SUM(Total)
+FROM chinook.invoices
+WHERE InvoiceDate like BETWEEN '2013-01-01' AND '2013-12-31;
+
+#10. Provide the purchased track name  with each invoice line ID.
+SELECT tracks.Name, invoice_items.InvoiceLineId
+FROM chinook.Invoice_items invoice_items
+JOIN chinook.Tracks tracks
+ON invoice_items.TrackId = tracks.TrackId;
+
+#11. Provide the purchased track name AND artist name with each invoice line ID.
+SELECT tracks.Name as Track, artists.Name as Artist, invoice_items.InvoiceLineId
+FROM chinook.invoice_items invoice_items
+    LEFT JOIN chinook.tracks tracks
+    ON invoice_items.TrackId = tracks.TrackId
+    INNER JOIN chinook.albums albums
+    ON albums.AlbumId = tracks.AlbumId
+    LEFT JOIN chinook.artists artists
+    ON artists.ArtistId = albums.ArtistId;
+
+#12. Shows all the Tracks along with the Album name, Media type, and Genre.
+SELECT tracks.name AS 'Track Name', albums.Title AS 'Album Name', media_types.Name AS 'Media Type', genres.Name AS 'Genre'
+FROM chinook.tracks tracks
+    JOIN chinook.albums albums
+    ON albums.AlbumId = tracks.AlbumId;
+    JOIN chinook.media_types media_types 
+    ON media_types.MediaTypeId = tracks.MediaTypeId 
+    JOIN chinook.genres genres 
+    ON genres.GenreId = tracks.GenreId     
+
+#13. Show the total sales made by each sales agent.
+SELECT employees.FirstName, employees.LastName, ROUND(SUM(Invoices.Total),2) as 'Total_Sales'
+FROM chinook.employees employees 
+    JOIN chinook.customers customers
+    ON customers.SupportRepId = employees.EmployeeId 
+    JOIN chinook.invoices invoices
+    ON invoices.CustomerId = customers.CustomerId
+    WHERE employees.Title = 'Sales Support Agent' 
+    GROUP BY employees.FirstName;
+
+#14. Which sales agent made the most in sales in 2013?
+SELECT employees.FirstName, employees.LastName, ROUND(SUM(Invoices.Total),2) as Total_Sales
+FROM chinook.employees employees 
+
+    JOIN chinook.customers customers
+    ON customers.SupportRepId = employees.EmployeeId 
+    
+    JOIN chinook.invoices invoices
+    ON invoices.CustomerId = customers.CustomerId
+    
+    WHERE employees.Title = 'Sales Support Agent' 
+    AND invoices.InvoiceDate LIKE '2013%'
+    GROUP BY employees.FirstName
+    ORDER BY Total_Sales DESC LIMIT 1;
